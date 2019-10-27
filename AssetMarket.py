@@ -35,7 +35,10 @@ class AssetMarket:
         for atype, asset in self.Assets.items():
             qty = 0.
             for bank_name, bank_order_dict in all_order_list.items():
-                qty += bank_order_dict[atype]
+                try:
+                    qty += bank_order_dict[atype]
+                except KeyError:
+                    pass
             fraction_to_sell = qty/asset.Quantity
             new_price = asset.ImpactFunction(current_prices[atype], fraction_to_sell)
             self.prices[atype] = new_price

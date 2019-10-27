@@ -43,8 +43,8 @@ def load_bs():
 def initialize_asset_market():
     assets = {}
     assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
-        Asset('CASH', 1e7, CifuentesImpact), Asset('CB', 1e7, CifuentesImpact), \
-        Asset('GB', 1e7, CifuentesImpact), Asset('OTHER', 1e7, CifuentesImpact)
+        Asset('CASH', 1e6, CifuentesImpact), Asset('CB', 1e6, CifuentesImpact), \
+        Asset('GB', 1e6, CifuentesImpact), Asset('OTHER', 1e7, CifuentesImpact)
     return AssetMarket(assets)
 
 
@@ -61,7 +61,7 @@ class BankSimEnv(MultiAgentEnv):
         balance_sheets = load_bs()
         for bank_name, BS in balance_sheets.items():
             self.allAgentBanks[bank_name] = AgentBank(bank_name, self.AssetMarket, BS)
-        self.AssetMarket.apply_initial_shock('GB', 0.2)
+        self.AssetMarket.apply_initial_shock('GB', 0.0)
         obs = {}
         price_dict = self.AssetMarket.query_price()
         for bank_name, bank in self.allAgentBanks.items():
@@ -85,21 +85,25 @@ class BankSimEnv(MultiAgentEnv):
         obs, rewards, dones, infos = {}, {}, {}, {}
         # get new prices that reflect the market impact of all orders
         new_prices = self.AssetMarket.process_orders(action_dict)
-        for bank_name, bank in self.allAgentBanks.items():
+        print(new_prices)
+        name_bank_list = self.allAgentBanks.items()
+        for bank_name, bank in name_bank_list:
             # reflect the asset sale on the bank' BS
+            # print(bank_name, bank.get_leverage_ratio())
             action = action_dict[bank_name]
             bank.BS.sell_action(action)
             bank.BS.Asset['CASH'].Quantity += self.AssetMarket.convert_to_cash(action)
             # force banks to pay back loans to keep leverage ratio above minimal
             minlev = bank.LeverageMin
             if bank.get_leverage_ratio() > minlev:
-                continue
+                pass
             else:
                 asset_value = bank.get_asset_value()
                 liability_value = bank.get_liability_value()
                 equity_value = asset_value - liability_value
-                cash_to_pay = (equity_value - (1+minlev) * liability_value) / (1 - minlev)
-                if cash_to_pay > bank.BS.Asset['CASH']:
+                cash_to_pay = asset_value - (equity_value / minlev)
+                # print(bank_name, cash_to_pay, bank.BS.Asset['CASH'].Quantity)
+                if cash_to_pay > bank.BS.Asset['CASH'].Quantity:
                     bank.DaysInsolvent += 1
                 else:
                     bank.BS.Asset['CASH'].Quantity -= cash_to_pay
@@ -112,22 +116,43 @@ class BankSimEnv(MultiAgentEnv):
             else:
                 rewards[bank_name] = 1.
             # return dones
-            if bank.DaysInsolvent >= 2:
+            if bank.DaysInsolvent == 2:
                 dones[bank_name] = True
+                print(f'Bank {bank_name} defaults! Leverage is {bank.get_leverage_ratio()}!')
             else:
                 dones[bank_name] = False
             # return infos
             infos[bank_name] = None
 
-            return obs, rewards, dones, infos
-
+        return obs, rewards, dones, infos
 
 
 if __name__ == '__main__':
     env = BankSimEnv()
+
     init_obs = env.reset()
-    for _, v in init_obs.items():
-        print(v[3])
+
+    def stupid_action(bank):
+        action = {}
+        if bank.DaysInsolvent == 0:
+            CB_qty = bank.BS.Asset['CB'].Quantity
+            GB_qty = bank.BS.Asset['GB'].Quantity
+            action['CB'], action['GB'] = CB_qty*0.01, GB_qty*0.01
+        elif bank.DaysInsolvent == 1:
+            CB_qty = bank.BS.Asset['CB'].Quantity
+            GB_qty = bank.BS.Asset['GB'].Quantity
+            Other_qty = bank.BS.Asset['OTHER'].Quantity
+            action['CB'], action['GB'], action['OTHER'] = CB_qty, GB_qty, Other_qty
+        return action
+
+    play = 0
+    while play < 10:
+        actions = {}
+        play += 1
+        for bank_name, bank in env.allAgentBanks.items():
+            actions[bank_name] = stupid_action(bank)
+        env.step(actions)
+
 
 
 

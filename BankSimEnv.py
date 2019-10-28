@@ -55,6 +55,7 @@ def initialize_asset_market():
 class BankSimEnv(MultiAgentEnv):
     def __init__(self):
         self.allAgentBanks = {}
+        self.initialEquity = {}
         self.DefaultBanks = []  # list of names that has defaulted
         self.AssetMarket = initialize_asset_market()
 
@@ -66,10 +67,12 @@ class BankSimEnv(MultiAgentEnv):
         self.allAgentBanks = {}
         self.DefaultBanks = []  # list of names that has defaulted
         self.AssetMarket = initialize_asset_market()
-        balance_sheets = load_bs()
-        for bank_name, BS in balance_sheets.items():
+        init_balance_sheets = load_bs()
+        for bank_name, BS in init_balance_sheets.items():
             self.allAgentBanks[bank_name] = AgentBank(bank_name, self.AssetMarket, BS)
         self.AssetMarket.apply_initial_shock('GB', shock)
+        for bank_name, bank in self.allAgentBanks.items():
+            self.initialEquity[bank_name] = bank.get_equity_value()
         obs = {}
         price_dict = self.AssetMarket.query_price()
         for bank_name, bank in self.allAgentBanks.items():
@@ -125,7 +128,7 @@ class BankSimEnv(MultiAgentEnv):
             if bank.DaysInsolvent >= 1:
                 rewards[bank_name] = -10
             else:
-                rewards[bank_name] = 1.
+                rewards[bank_name] = 1. + bank.get_equity_value() / self.initialEquity[bank_name]
             # return dones
             if bank.DaysInsolvent == 2:
                 dones[bank_name] = True

@@ -31,6 +31,7 @@ class BalanceSheet:
 
 
 
+
 class AgentBank:
     def __init__(self, bank_name, asset_market, balance_sheet):
         self.BankName = bank_name
@@ -53,6 +54,9 @@ class AgentBank:
         for ltype, liability in liabilities.items():
             value += liability.Quantity
         return value
+
+    def get_equity_value(self):
+        return (self.get_asset_value() - self.get_liability_value())
 
     def get_leverage_ratio(self):
         return (self.get_asset_value() - self.get_liability_value())/ self.get_asset_value()

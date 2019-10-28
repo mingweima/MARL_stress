@@ -15,14 +15,14 @@ def MA_obs_to_bank_obs(obs, bank):
 agent_dict = {}
 env = BankSimEnv()
 
-for name in ['AT01', 'BE04', 'FR09']:
-    agent = Agent(state_size=4, action_size=3, random_seed=0, name=name)
+for idx, name in enumerate(['AT01', 'BE04', 'FR09']):
+    agent = Agent(state_size=4, action_size=3, random_seed=idx, name=name)
     agent_dict[name] = agent
 
 for episode in range(100000):
     print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
-    play, max_play = 0, 5
+    play, max_play = 0, 10
     num_default = []
     while play < max_play:
         actions = {}
@@ -34,7 +34,7 @@ for episode in range(100000):
             my_obs = MA_obs_to_bank_obs(current_obs, bank)
             current_obs[bank_name] = my_obs
             # choose action
-            action = agent_dict[bank_name].act(current_obs[bank_name], add_noise=True)
+            action = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
             actions[bank_name] = action  # this is where you use your RLAgents!
         # convert actions
         actions_dict = {}

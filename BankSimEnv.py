@@ -7,7 +7,7 @@ import numpy as np
 
 from os import path
 # params
-shock = -0.5
+shock = 0.1
 bspath = path.abspath(path.join(path.dirname(__file__), "Bank3.csv"))
 
 

@@ -16,7 +16,7 @@ agent_dict = {}
 env = BankSimEnv()
 
 for idx, name in enumerate(['AT01', 'BE04', 'FR09']):
-    agent = Agent(state_size=4, action_size=3, random_seed=idx, name=name)
+    agent = Agent(state_size=4, action_size=2, random_seed=idx, name=name)
     agent_dict[name] = agent
 
 for episode in range(100000):
@@ -34,13 +34,20 @@ for episode in range(100000):
             my_obs = MA_obs_to_bank_obs(current_obs, bank)
             current_obs[bank_name] = my_obs
             # choose action
-            action = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
+            if bank.DaysInsolvent <= 0:
+                action = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
+            if bank.DaysInsolvent == 1:
+                action = {}
+                CB_qty = bank.BS.Asset['CB'].Quantity
+                GB_qty = bank.BS.Asset['GB'].Quantity
+                Other_qty = bank.BS.Asset['OTHER'].Quantity
+                action = [1, 1]
             actions[bank_name] = action  # this is where you use your RLAgents!
         # convert actions
         actions_dict = {}
         for name, action in actions.items():
             action_dict = {}
-            action_dict['CB'], action_dict['GB'], action_dict['CASH'] = action[0], action[1], action[2]
+            action_dict['CB'], action_dict['GB'] = action[0], action[1]
             actions_dict[name] = action_dict
         new_obs, rewards, dones, infos = env.step(actions_dict)
         for bank_name, bank in env.allAgentBanks.items():
@@ -48,7 +55,7 @@ for episode in range(100000):
                 continue
             my_new_obs = MA_obs_to_bank_obs(new_obs, bank)
             current_obs[bank_name] = my_new_obs
-            agent.step(current_obs[bank_name], actions[bank_name], rewards[bank_name], my_new_obs, dones[bank_name])
+            agent_dict[bank_name].step(current_obs[bank_name], actions[bank_name], rewards[bank_name], my_new_obs, dones[bank_name])
         current_obs = new_obs
         num_default.append(infos['NUM_DEFAULT'])
         play += 1

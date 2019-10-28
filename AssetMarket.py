@@ -28,7 +28,7 @@ class AssetMarket:
             else:
                 self.prices[atype] = 1.0
 
-    def process_orders(self, all_order_list):
+    def process_orders(self, allBanks, all_order_list):
         # update market prices after processing all incoming orders from agents
         # all_order_list = { 'BANK_NAME': {A_TYPE: QTY}  } }
         current_prices = self.query_price()
@@ -37,7 +37,7 @@ class AssetMarket:
             for bank_name, bank_order_dict in all_order_list.items():
                 try:
                     # print(qty, bank_order_dict, atype)
-                    qty += bank_order_dict[atype]
+                    qty += bank_order_dict[atype] * allBanks[bank_name].BS.Asset[atype].Quantity
                 except KeyError:
                     pass
             fraction_to_sell = qty/asset.Quantity

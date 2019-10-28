@@ -48,7 +48,7 @@ def initialize_asset_market():
     assets = {}
     assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
         Asset('CASH', 1e6, CifuentesImpact), Asset('CB', 1e6, CifuentesImpact), \
-        Asset('GB', 1e6, CifuentesImpact), Asset('OTHER', 1e7, CifuentesImpact)
+        Asset('GB', 1e6, CifuentesImpact), Asset('OTHER', 1e5, CifuentesImpact)
     return AssetMarket(assets)
 
 
@@ -92,7 +92,8 @@ class BankSimEnv(MultiAgentEnv):
         """
         obs, rewards, dones, infos = {}, {}, {}, {}
         # get new prices that reflect the market impact of all orders
-        new_prices = self.AssetMarket.process_orders(action_dict)
+        new_prices = self.AssetMarket.process_orders(self.allAgentBanks, action_dict)
+        # print(new_prices)
         name_bank_list = self.allAgentBanks.items()
         for bank_name, bank in name_bank_list:
             # if the bank has defaulted, skip
@@ -143,17 +144,12 @@ if __name__ == '__main__':
     def stupid_action(bank):
         action = {}
         if bank.DaysInsolvent == 0:
-            CB_qty = bank.BS.Asset['CB'].Quantity
-            GB_qty = bank.BS.Asset['GB'].Quantity
-            action['CB'], action['GB'] = CB_qty*0.2*abs(np.random.normal()-0.5), GB_qty*0.2*np.random.normal()*abs(np.random.normal()-0.5)
+            action['CB'], action['GB'] = 0.2*abs(np.random.normal()-0.5), 0.2*np.random.normal()*abs(np.random.normal()-0.5)
         elif bank.DaysInsolvent == 1:
-            CB_qty = bank.BS.Asset['CB'].Quantity
-            GB_qty = bank.BS.Asset['GB'].Quantity
-            Other_qty = bank.BS.Asset['OTHER'].Quantity
-            action['CB'], action['GB'], action['OTHER'] = CB_qty, GB_qty, Other_qty
+            action['CB'], action['GB'] = 1, 1
         return action
 
-    play, max_play = 0, 10
+    play, max_play = 0, 20
     num_default = []
     while play < max_play:
         actions = {}

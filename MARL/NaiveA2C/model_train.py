@@ -37,10 +37,6 @@ for episode in range(100000):
             if bank.DaysInsolvent <= 0:
                 action = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
             if bank.DaysInsolvent == 1:
-                action = {}
-                CB_qty = bank.BS.Asset['CB'].Quantity
-                GB_qty = bank.BS.Asset['GB'].Quantity
-                Other_qty = bank.BS.Asset['OTHER'].Quantity
                 action = [1, 1]
             actions[bank_name] = action  # this is where you use your RLAgents!
         # convert actions

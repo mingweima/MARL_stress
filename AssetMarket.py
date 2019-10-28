@@ -36,6 +36,7 @@ class AssetMarket:
             qty = 0.
             for bank_name, bank_order_dict in all_order_list.items():
                 try:
+                    # print(qty, bank_order_dict, atype)
                     qty += bank_order_dict[atype]
                 except KeyError:
                     pass

@@ -5,15 +5,18 @@ from ImpactFunctions import CifuentesImpact
 import matplotlib.pyplot as plt
 import numpy as np
 
+from os import path
+# params
+shock = -0.5
+bspath = path.abspath(path.join(path.dirname(__file__), "Bank3.csv"))
+
+
 def load_bs():
-    with open('EBA_2018.csv', 'r') as data:
+    with open(bspath, 'r') as data:
         bs_from_csv = data.read().strip().split('\n')[1:]
-
     BalanceSheets = {}
-
     for bs in bs_from_csv:
         assets, liabilities = {}, {}
-
         # extract different asset/liability types from the doc
         row = bs.split(' ')
         bank_name, equity, leverage, debt_sec, gov_bonds = row
@@ -60,10 +63,13 @@ class BankSimEnv(MultiAgentEnv):
         Returns:
             obs (dict): New observations for each ready agent.
         """
+        self.allAgentBanks = {}
+        self.DefaultBanks = []  # list of names that has defaulted
+        self.AssetMarket = initialize_asset_market()
         balance_sheets = load_bs()
         for bank_name, BS in balance_sheets.items():
             self.allAgentBanks[bank_name] = AgentBank(bank_name, self.AssetMarket, BS)
-        self.AssetMarket.apply_initial_shock('GB', 0.1)
+        self.AssetMarket.apply_initial_shock('GB', shock)
         obs = {}
         price_dict = self.AssetMarket.query_price()
         for bank_name, bank in self.allAgentBanks.items():
@@ -84,7 +90,7 @@ class BankSimEnv(MultiAgentEnv):
                 "__all__" (required) is used to indicate env termination.
             infos (dict): Optional info values for each agent id.
         """
-        obs, rewards, dones, infos = {}, {}, {}, {'ASSET_PRICES': {}, 'NUM_DEFAULT': 0}
+        obs, rewards, dones, infos = {}, {}, {}, {}
         # get new prices that reflect the market impact of all orders
         new_prices = self.AssetMarket.process_orders(action_dict)
         name_bank_list = self.allAgentBanks.items()
@@ -116,7 +122,7 @@ class BankSimEnv(MultiAgentEnv):
             obs[bank.BankName] = (new_prices, bank.BS.Asset, bank.BS.Liability, bank.get_leverage_ratio())
             # return reward
             if bank.DaysInsolvent >= 1:
-                rewards[bank_name] = -1e3
+                rewards[bank_name] = -10
             else:
                 rewards[bank_name] = 1.
             # return dones
@@ -139,7 +145,7 @@ if __name__ == '__main__':
         if bank.DaysInsolvent == 0:
             CB_qty = bank.BS.Asset['CB'].Quantity
             GB_qty = bank.BS.Asset['GB'].Quantity
-            action['CB'], action['GB'] = CB_qty*np.random.normal(), GB_qty*np.random.normal()
+            action['CB'], action['GB'] = CB_qty*0.2*abs(np.random.normal()-0.5), GB_qty*0.2*np.random.normal()*abs(np.random.normal()-0.5)
         elif bank.DaysInsolvent == 1:
             CB_qty = bank.BS.Asset['CB'].Quantity
             GB_qty = bank.BS.Asset['GB'].Quantity
@@ -154,8 +160,7 @@ if __name__ == '__main__':
         play += 1
         for bank_name, bank in env.allAgentBanks.items():
             actions[bank_name] = stupid_action(bank)  # this is where you use your RLAgents!
-        print(actions)
-        _, _, _, infos = env.step(actions)
+        obs, _, _, infos = env.step(actions)
         num_default.append(infos['NUM_DEFAULT'])
 
     plt.plot(num_default)

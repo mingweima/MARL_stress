@@ -24,7 +24,7 @@ class BalanceSheet:
         # deduce the sold assets from BS
         # action = {ASSET_TYPE: QTY}, ASSET_TYPE must not be 'CASH'; it can only be tradable asset
         for atype, qty in action.items():
-            self.Asset[atype].Quantity -= qty
+            self.Asset[atype].Quantity -= qty * self.Asset[atype].Quantity
 
     def add_cash(self, cash):
         self.Asset['CASH'] += cash

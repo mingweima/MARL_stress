@@ -7,7 +7,7 @@ import numpy as np
 
 from os import path
 # params
-shock = 0.2
+shock = 0.1
 bspath = path.abspath(path.join(path.dirname(__file__), "Bank3.csv"))
 
 
@@ -27,7 +27,7 @@ def load_bs():
         corp_bonds = debt_sec - gov_bonds
 
         asset = equity / (float(leverage) / 100)
-        cash = 0.05 * asset
+        cash = 0.0 * asset # assume all cash has already be used up to pay back leverage
         other_asset = asset - debt_sec - cash
 
         liability = asset - equity
@@ -47,8 +47,8 @@ def load_bs():
 def initialize_asset_market():
     assets = {}
     assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
-        Asset('CASH', 1e6, CifuentesImpact), Asset('CB', 1e6, CifuentesImpact), \
-        Asset('GB', 1e6, CifuentesImpact), Asset('OTHER', 1e5, CifuentesImpact)
+        Asset('CASH', 1e6, CifuentesImpact), Asset('CB', 3e5, CifuentesImpact), \
+        Asset('GB', 3e5, CifuentesImpact), Asset('OTHER', 1e5, CifuentesImpact)
     return AssetMarket(assets)
 
 

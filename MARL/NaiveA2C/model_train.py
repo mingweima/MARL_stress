@@ -15,12 +15,14 @@ def MA_obs_to_bank_obs(obs, bank):
 agent_dict = {}
 env = BankSimEnv()
 
-for idx, name in enumerate(['AT01', 'BE04', 'FR09']):
+for idx, name in enumerate(['B1', "B2", 'B3', 'B4']):
     agent = Agent(state_size=4, action_size=2, random_seed=idx, name=name)
     agent_dict[name] = agent
 
-for episode in range(1000):
-    print(f'=========================================Episode {episode}===============================================')
+for episode in range(10000):
+
+    if episode == 0 or episode % 100 == 0:
+        print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
     play, max_play = 0, 15
     num_default = []
@@ -29,13 +31,14 @@ for episode in range(1000):
         for bank_name, bank in env.allAgentBanks.items():
             if bank.DaysInsolvent >= 2:
                 continue
-            print(f'Round {play}. Bank {bank_name}, CB: {int(bank.BS.Asset["CB"].Quantity)}, GB: {int(bank.BS.Asset["GB"].Quantity)}, CASH: {int(bank.BS.Asset["CASH"].Quantity)}, LEV: {int(bank.get_leverage_ratio()*100)}%')
+            if episode % 100 == 0:
+                print(f'Round {play}. Bank {bank_name}, CB: {int(bank.BS.Asset["CB"].Quantity)}, GB: {int(bank.BS.Asset["GB"].Quantity)}, CASH: {int(bank.BS.Asset["CASH"].Quantity)}, LEV: {int(bank.get_leverage_ratio()*100)}%')
             # conversion
             my_obs = MA_obs_to_bank_obs(current_obs, bank)
             current_obs[bank_name] = my_obs
             # choose action
             if bank.DaysInsolvent <= 0:
-                action = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
+                action = agent_dict[bank_name].act(current_obs[bank_name], add_noise=True)
             if bank.DaysInsolvent == 1:
                 action = [1, 1]
             actions[bank_name] = action  # this is where you use your RLAgents!

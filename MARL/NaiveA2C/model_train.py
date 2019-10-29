@@ -15,16 +15,15 @@ def MA_obs_to_bank_obs(obs, bank):
 agent_dict = {}
 env = BankSimEnv()
 
-for idx, name in enumerate(['B1', "B2", 'B3', 'B4']):
-    agent = Agent(state_size=3, action_size=2, random_seed=idx, name=name)
+for idx, name in enumerate([f'B0{i}' for i in range(1, 9)]):
+    agent = Agent(state_size=3, action_size=2, random_seed=0, name=name)
     agent_dict[name] = agent
 
 for episode in range(100000):
-
     if episode == 0 or episode % 100 == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
-    play, max_play = 0, 15
+    play, max_play = 0, 5
     num_default = []
     while play < max_play:
         actions = {}
@@ -32,7 +31,9 @@ for episode in range(100000):
             if bank.DaysInsolvent >= 2:
                 continue
             if episode % 100 == 0:
-                print(f'Round {play}. Bank {bank_name}, CB: {int(bank.BS.Asset["CB"].Quantity)}, GB: {int(bank.BS.Asset["GB"].Quantity)}, EQUITY: {int(bank.get_equity_value())}, LEV: {int(bank.get_leverage_ratio()*100)}%')
+                 print(
+                    f'Round {play}. Bank {bank_name}, CB: {int(bank.BS.Asset["CB"].Quantity)}, GB: {int(bank.BS.Asset["GB"].Quantity)}',
+                    f'EQUITY: {int(bank.get_equity_value())}, ASSET: {int(bank.get_asset_value())}, LIABILITY: {int(bank.get_liability_value())}, LEV: {int(bank.get_leverage_ratio() * 10000)} bps')
             # conversion
             my_obs = MA_obs_to_bank_obs(current_obs, bank)
             current_obs[bank_name] = my_obs

@@ -7,7 +7,7 @@ import numpy as np
 
 from os import path
 # params
-shock = 0.12
+shock = 0.25
 bspath = path.abspath(path.join(path.dirname(__file__), "Bank3.csv"))
 
 
@@ -31,13 +31,13 @@ def load_bs():
         other_asset = asset - debt_sec - cash
 
         liability = asset - equity
-        loan = other_liability = liability / 2
+        loan = liability
 
         assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
             Asset('CASH', cash, CifuentesImpact), Asset('CB', corp_bonds, CifuentesImpact), \
             Asset('GB', gov_bonds, CifuentesImpact), Asset('OTHER', other_asset, CifuentesImpact)
 
-        liabilities['LOAN'], liabilities['OTHER'] = Liability('LOAN', loan), Liability('OTHER', other_liability)
+        liabilities['LOAN'] = Liability('LOAN', loan)
 
         BS = BalanceSheet(assets, liabilities)
         BalanceSheets[bank_name] = BS
@@ -47,7 +47,7 @@ def load_bs():
 def initialize_asset_market():
     assets = {}
     assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
-        Asset('CASH', 1e6, CifuentesImpact), Asset('CB', 3e5, CifuentesImpact), \
+        Asset('CASH', 1e6, CifuentesImpact), Asset('CB', 1e5, CifuentesImpact), \
         Asset('GB', 3e5, CifuentesImpact), Asset('OTHER', 1e5, CifuentesImpact)
     return AssetMarket(assets)
 
@@ -105,30 +105,21 @@ class BankSimEnv(MultiAgentEnv):
             # reflect the asset sale on the bank' BS
             # print(bank_name, bank.get_leverage_ratio())
             action = action_dict[bank_name]
+            bank.BS.Liability['LOAN'].Quantity -= self.AssetMarket.convert_to_cash(bank, action)
             bank.BS.sell_action(action)
-            bank.BS.Asset['CASH'].Quantity += self.AssetMarket.convert_to_cash(action)
             # force banks to pay back loans to keep leverage ratio above minimal
             minlev = bank.LeverageMin
             if bank.get_leverage_ratio() > minlev:
                 pass
             else:
-                asset_value = bank.get_asset_value()
-                liability_value = bank.get_liability_value()
-                equity_value = asset_value - liability_value
-                cash_to_pay = asset_value - (equity_value / minlev)
-                # print(bank_name, cash_to_pay, bank.BS.Asset['CASH'].Quantity)
-                if cash_to_pay > bank.BS.Asset['CASH'].Quantity:
-                    bank.DaysInsolvent += 1
-                else:
-                    bank.BS.Asset['CASH'].Quantity -= cash_to_pay
-                    bank.BS.Liability['LOAN'].Quantity -= cash_to_pay
+                bank.DaysInsolvent += 1
             # return obs
             obs[bank.BankName] = (new_prices, bank.BS.Asset, bank.BS.Liability, bank.get_leverage_ratio())
             # return reward
-            if bank.DaysInsolvent >= 1:
+            if bank.DaysInsolvent == 1:
                 rewards[bank_name] = -10
             else:
-                rewards[bank_name] = 1. + bank.get_equity_value() / self.initialEquity[bank_name]
+                rewards[bank_name] = bank.get_equity_value() / self.initialEquity[bank_name]
             # return dones
             if bank.DaysInsolvent == 2:
                 dones[bank_name] = True
@@ -147,25 +138,28 @@ if __name__ == '__main__':
     def stupid_action(bank):
         action = {}
         if bank.DaysInsolvent == 0:
-            action['CB'], action['GB'] = 0.2*abs(np.random.normal()-0.5), 0.2*np.random.normal()*abs(np.random.normal()-0.5)
+            action['CB'], action['GB'] = 0.01, 0.01
         elif bank.DaysInsolvent == 1:
             action['CB'], action['GB'] = 1, 1
         return action
 
-    play, max_play = 0, 20
+    play, max_play = 0, 5
     num_default = []
     while play < max_play:
         actions = {}
         play += 1
         for bank_name, bank in env.allAgentBanks.items():
+            print(
+                f'Round {play}. Bank {bank_name}, CB: {int(bank.BS.Asset["CB"].Quantity)}, GB: {int(bank.BS.Asset["GB"].Quantity)}, CASH: {int(bank.BS.Asset["CASH"].Quantity)}, '
+                f'EQUITY: {int(bank.get_equity_value())}, ASSET: {int(bank.get_asset_value())}, LIABILITY: {int(bank.get_liability_value())}, LEV: {int(bank.get_leverage_ratio() * 10000)} bps')
             actions[bank_name] = stupid_action(bank)  # this is where you use your RLAgents!
         obs, _, _, infos = env.step(actions)
         num_default.append(infos['NUM_DEFAULT'])
 
-    plt.plot(num_default)
-    plt.ylabel('Number of defaults')
-    plt.show()
-
+    # plt.plot(num_default)
+    # plt.ylabel('Number of defaults')
+    # plt.show()
+    #
 
 
 

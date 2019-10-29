@@ -30,8 +30,6 @@ class BalanceSheet:
         self.Asset['CASH'] += cash
 
 
-
-
 class AgentBank:
     def __init__(self, bank_name, asset_market, balance_sheet):
         self.BankName = bank_name
@@ -56,10 +54,10 @@ class AgentBank:
         return value
 
     def get_equity_value(self):
-        return (self.get_asset_value() - self.get_liability_value())
+        return self.get_asset_value() - self.get_liability_value()
 
     def get_leverage_ratio(self):
-        return (self.get_asset_value() - self.get_liability_value())/ self.get_asset_value()
+        return self.get_equity_value() / self.get_asset_value()
 
 
 

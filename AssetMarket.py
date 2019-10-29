@@ -12,12 +12,12 @@ class AssetMarket:
         # returns prices of all assets as dict {TYPE: PRICE}
         return dict(self.prices)
 
-    def convert_to_cash(self, action):
+    def convert_to_cash(self, bank, action):
         # action = {TYPE: QTY}
         cash = 0
         prices = self.query_price()
         for atype, qty in action.items():
-            cash += prices[atype] * qty
+            cash += prices[atype] * qty * bank.BS.Asset[atype].Quantity
         return cash
 
     def apply_initial_shock(self, asset_to_shock, shock):

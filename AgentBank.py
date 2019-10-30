@@ -37,6 +37,7 @@ class AgentBank:
         self.BS = balance_sheet
         self.LeverageMin = 0.03
         self.DaysInsolvent = 0
+        self.time_of_death = None
 
     def get_asset_value(self):
         prices = self.AssetMarket.query_price()

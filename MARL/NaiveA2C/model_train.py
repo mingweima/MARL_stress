@@ -1,5 +1,6 @@
 from BankSimEnv import BankSimEnv
 from MARL.NaiveA2C.ddpg_agent import Agent
+from MARL.NaiveA2C.util import setup_matplotlib, plot_custom_errorbar_plot
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -15,11 +16,13 @@ def MA_obs_to_bank_obs(obs, bank):
 agent_dict = {}
 env = BankSimEnv()
 
-for idx, name in enumerate([f'B0{i}' for i in range(1, 9)]):
+for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
     agent = Agent(state_size=3, action_size=2, random_seed=0, name=name)
     agent_dict[name] = agent
 
-for episode in range(100000):
+
+average_lifespans = []
+for episode in range(500):
     if episode == 0 or episode % 100 == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
@@ -59,7 +62,14 @@ for episode in range(100000):
         current_obs = new_obs
         num_default.append(infos['NUM_DEFAULT'])
         play += 1
+        if play == max_play:
+            # print(infos['AVERAGE_LIFESPAN'])
+            average_lifespans.append(infos['AVERAGE_LIFESPAN'])
 
-    # plt.plot(num_default)
-    # plt.ylabel('Number of defaults')
-    # plt.show()
+setup_matplotlib()
+x_points = int(len(average_lifespans)/100)
+average_lifespans = np.array(average_lifespans).reshape(x_points, 100)
+means_avg_lifespans = np.mean(average_lifespans, axis=1)
+stds_avg_lifespans = np.std(average_lifespans, axis=1)
+plot_custom_errorbar_plot(range(x_points), means_avg_lifespans, stds_avg_lifespans)
+plt.show()

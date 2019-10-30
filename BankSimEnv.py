@@ -7,7 +7,7 @@ import numpy as np
 
 from os import path
 # params
-shock = 0.25
+shock = 0.2
 bspath = path.abspath(path.join(path.dirname(__file__), "Bank3.csv"))
 
 
@@ -58,6 +58,7 @@ class BankSimEnv(MultiAgentEnv):
         self.initialEquity = {}
         self.DefaultBanks = []  # list of names that has defaulted
         self.AssetMarket = initialize_asset_market()
+        self.time = 0
 
     def reset(self):
         """Resets the env and returns observations from ready agents.
@@ -118,6 +119,7 @@ class BankSimEnv(MultiAgentEnv):
             # return reward
             if bank.DaysInsolvent == 1:
                 rewards[bank_name] = -10
+                bank.time_of_death = self.time
             else:
                 rewards[bank_name] = bank.get_equity_value() / self.initialEquity[bank_name]
             # return dones
@@ -128,6 +130,9 @@ class BankSimEnv(MultiAgentEnv):
             else:
                 dones[bank_name] = False
         infos['ASSET_PRICES'], infos['NUM_DEFAULT'] = new_prices, len(self.DefaultBanks)
+        allAgents = self.allAgentBanks.values()
+        infos['AVERAGE_LIFESPAN'] = sum(self.time if a.DaysInsolvent == 0 else a.time_of_death for a in allAgents) / len(list(allAgents))
+        self.time += 1
         return obs, rewards, dones, infos
 
 

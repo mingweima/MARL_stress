@@ -22,7 +22,7 @@ for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
 
 
 average_lifespans = []
-for episode in range(500):
+for episode in range(800):
     if episode == 0 or episode % 100 == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
@@ -31,7 +31,7 @@ for episode in range(500):
     while play < max_play:
         actions = {}
         for bank_name, bank in env.allAgentBanks.items():
-            if bank.DaysInsolvent >= 2:
+            if bank_name in env.DefaultBanks:
                 continue
             if episode % 100 == 0:
                  print(
@@ -41,11 +41,7 @@ for episode in range(500):
             my_obs = MA_obs_to_bank_obs(current_obs, bank)
             current_obs[bank_name] = my_obs
             # choose action
-            if bank.DaysInsolvent <= 0:
-                action = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
-            if bank.DaysInsolvent == 1:
-                action = [1, 1]
-            actions[bank_name] = action  # this is where you use your RLAgents!
+            actions[bank_name] = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
         # convert actions
         actions_dict = {}
         for name, action in actions.items():
@@ -54,7 +50,7 @@ for episode in range(500):
             actions_dict[name] = action_dict
         new_obs, rewards, dones, infos = env.step(actions_dict)
         for bank_name, bank in env.allAgentBanks.items():
-            if bank.DaysInsolvent >= 2:
+            if bank_name in env.DefaultBanks:
                 continue
             my_new_obs = MA_obs_to_bank_obs(new_obs, bank)
             current_obs[bank_name] = my_new_obs

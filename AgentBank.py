@@ -37,7 +37,9 @@ class AgentBank:
         self.BS = balance_sheet
         self.LeverageMin = 0.03
         self.DaysInsolvent = 0
-        self.time_of_death = None
+        self.IsInsolvent = False
+        self.Day = 0
+        self.DeathTime = 0
 
     def get_asset_value(self):
         prices = self.AssetMarket.query_price()
@@ -59,6 +61,29 @@ class AgentBank:
 
     def get_leverage_ratio(self):
         return self.get_equity_value() / self.get_asset_value()
+
+    def return_obs(self):
+        return (self.AssetMarket.query_price(), self.BS.Asset, self.BS.Liability, self.get_leverage_ratio())
+
+    def day_trade(self, action):
+        self.Day += 1
+        minlev = self.LeverageMin
+        if self.get_leverage_ratio() > minlev:
+            # deduct the amount to sell from BS
+            self.BS.sell_action(action)
+        else:
+            self.IsInsolvent = True
+            # print(f"Bank {self.BankName} Defualts at Day {self.Day}!")
+            # set all QTY to 1 (liquidate all tradables)
+            for atype, qty in action.items():
+                action[atype] = 1
+            self.BS.sell_action(action)
+        return action
+
+
+
+
+
 
 
 

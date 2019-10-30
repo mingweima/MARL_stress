@@ -6,23 +6,25 @@ import numpy as np
 
 
 def MA_obs_to_bank_obs(obs, bank):
+    # obs is (bank.AssetMarket.query_price(), bank.BS.Asset, bank.BS.Liability, bank.get_leverage_ratio(), bank.initialBS)
     bank_obs = obs[bank.BankName]
     # print(f'BANK OBS of {bank.BankName}', bank_obs)
     cb_price, gb_price =  bank_obs[0]['CB'], bank_obs[0]['GB']
+    cb_left, gb_left, loans_left = bank_obs[1]['CB'].Quantity/bank_obs[4].Asset['CB'].Quantity, bank_obs[1]['CB'].Quantity/bank_obs[4].Asset['GB'].Quantity, bank_obs[2]['LOAN'].Quantity/bank_obs[4].Liability['LOAN'].Quantity
     leverage = bank_obs[3]
-    return np.asarray([cb_price, gb_price, leverage])
+    return np.asarray([cb_price, gb_price, cb_left, gb_left, loans_left, leverage*30])
 
 
 agent_dict = {}
 env = BankSimEnv()
 
 for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
-    agent = Agent(state_size=3, action_size=2, random_seed=0, name=name)
+    agent = Agent(state_size=6, action_size=2, random_seed=0, name=name)
     agent_dict[name] = agent
 
 
 average_lifespans = []
-for episode in range(800):
+for episode in range(50000):
     if episode == 0 or episode % 100 == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
@@ -63,8 +65,8 @@ for episode in range(800):
             average_lifespans.append(infos['AVERAGE_LIFESPAN'])
 
 setup_matplotlib()
-x_points = int(len(average_lifespans)/100)
-average_lifespans = np.array(average_lifespans).reshape(x_points, 100)
+x_points = int(len(average_lifespans)/20)
+average_lifespans = np.array(average_lifespans).reshape(x_points, 20)
 means_avg_lifespans = np.mean(average_lifespans, axis=1)
 stds_avg_lifespans = np.std(average_lifespans, axis=1)
 plot_custom_errorbar_plot(range(x_points), means_avg_lifespans, stds_avg_lifespans)

@@ -7,7 +7,7 @@ import numpy as np
 
 from os import path
 # params
-shock = 0.2
+shock = 0.0
 bspath = path.abspath(path.join(path.dirname(__file__), "Bank3.csv"))
 
 
@@ -80,61 +80,6 @@ class BankSimEnv(MultiAgentEnv):
             obs[bank.BankName] = bank.return_obs()
         return obs
 
-    # def step(self, action_dict):
-    #     # action_dict: {AgentName: {TYPE: QTY}}
-    #     """Returns observations from ready agents.
-    #     The returns are dicts mapping from agent_id strings to values. The
-    #     number of agents in the env can vary over time.
-    #     Returns
-    #     -------
-    #         obs (dict): New observations for each ready agent.
-    #         rewards (dict): Reward values for each ready agent. If the
-    #             episode is just started, the value will be None.
-    #         dones (dict): Done values for each ready agent. The special key
-    #             "__all__" (required) is used to indicate env termination.
-    #         infos (dict): Optional info values for each agent id.
-    #     """
-    #     obs, rewards, dones, infos = {}, {}, {}, {}
-    #     # get new prices that reflect the market impact of all orders
-    #     new_prices = self.AssetMarket.process_orders(self.allAgentBanks, action_dict)
-    #     # print(new_prices)
-    #     name_bank_list = self.allAgentBanks.items()
-    #     for bank_name, bank in name_bank_list:
-    #         # if the bank has defaulted, skip
-    #         if bank_name in self.DefaultBanks:
-    #             continue
-    #         # reflect the asset sale on the bank' BS
-    #         # print(bank_name, bank.get_leverage_ratio())
-    #         action = action_dict[bank_name]
-    #         bank.BS.Liability['LOAN'].Quantity -= self.AssetMarket.convert_to_cash(bank, action)
-    #         bank.BS.sell_action(action)
-    #         # force banks to pay back loans to keep leverage ratio above minimal
-    #         minlev = bank.LeverageMin
-    #         if bank.get_leverage_ratio() > minlev:
-    #             pass
-    #         else:
-    #             bank.DaysInsolvent += 1
-    #         # return obs
-    #         obs[bank.BankName] = bank.return_obs()
-    #         # return reward
-    #         if bank.DaysInsolvent == 1:
-    #             rewards[bank_name] = -10
-    #             bank.time_of_death = self.Day
-    #         else:
-    #             rewards[bank_name] = bank.get_equity_value() / self.initialEquity[bank_name]
-    #         # return dones
-    #         if bank.DaysInsolvent == 2:
-    #             dones[bank_name] = True
-    #             self.DefaultBanks.append(bank_name)
-    #             # print(f'Bank {bank_name} defaults! Leverage is {bank.get_leverage_ratio()}!')
-    #         else:
-    #             dones[bank_name] = False
-    #     infos['ASSET_PRICES'], infos['NUM_DEFAULT'] = new_prices, len(self.DefaultBanks)
-    #     allAgents = self.allAgentBanks.values()
-    #     infos['AVERAGE_LIFESPAN'] = sum(self.Day if a.DaysInsolvent == 0 else a.time_of_death for a in allAgents) / len(list(allAgents))
-    #     self.Day += 1
-    #     return obs, rewards, dones, infos
-
     def step(self, action_dict):
         # action_dict: {AgentName: {TYPE: QTY}}
         """Returns observations from ready agents.
@@ -164,8 +109,9 @@ class BankSimEnv(MultiAgentEnv):
         for bank_name, bank in name_bank_list:
             if bank_name in self.DefaultBanks:
                 continue
-            if bank.DaysInsolvent is False:
+            if bank.IsInsolvent is False:
                 bank.BS.Liability['LOAN'].Quantity -= self.AssetMarket.convert_to_cash(bank, action_dict[bank_name])
+                bank.BS.sell_action(action_dict[bank_name])
             # return obs
             obs[bank.BankName] = bank.return_obs()
             # return reward
@@ -193,6 +139,9 @@ class BankSimEnv(MultiAgentEnv):
 
         self.Day += 1
         return obs, rewards, dones, infos
+
+
+
 
 
 if __name__ == '__main__':

@@ -6,3 +6,4 @@
 __pycache__/
 *.py[cod]
 *.png
+MARL/NaiveA2C/__pycache__/ddpg_agent.cpython-37.pyc

@@ -1,7 +1,7 @@
 from copy import deepcopy
 import os
 
-from ray.rllib.env import MultiAgentEnv
+#from ray.rllib.env import MultiAgentEnv
 from Simulator.AgentBank import Asset, Liability, BalanceSheet, AgentBank
 from Simulator.AssetMarket import AssetMarket
 from Simulator.ImpactFunctions import CifuentesImpact
@@ -55,7 +55,7 @@ def initialize_asset_market():
     return AssetMarket(assets)
 
 
-class BankSimEnv(MultiAgentEnv):
+class BankSimEnv:#(MultiAgentEnv):
     def __init__(self):
         self.allAgentBanks = {}
         self.initialEquity = {}
@@ -149,7 +149,7 @@ class BankSimEnv(MultiAgentEnv):
         return obs, rewards, dones, infos
 
 
-class CollaborativeBankSimEnv(MultiAgentEnv):
+class CollaborativeBankSimEnv: #(MultiAgentEnv):
     def __init__(self):
         self.allAgentBanks = {}
         self.initialEquity = {}

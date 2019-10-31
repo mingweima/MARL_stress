@@ -132,9 +132,11 @@ class BankSimEnv(MultiAgentEnv):
         infos['AVERAGE_LIFESPAN'] = 0
         for bank in allAgents:
             if bank.IsInsolvent:
-                infos['AVERAGE_LIFESPAN'] += bank.DeathTime/len(list(allAgents))
+                infos['AVERAGE_LIFESPAN'] += bank.DeathTime
             else:
-                infos['AVERAGE_LIFESPAN'] += bank.Day/len(list(allAgents))
+                infos['AVERAGE_LIFESPAN'] += bank.Day
+        infos['AVERAGE_LIFESPAN'] /= len(list(allAgents))
+        infos['TOTAL_EQUITY'] = sum(bank.get_equity_value() for bank in allAgents)
 
         self.Day += 1
         return obs, rewards, dones, infos

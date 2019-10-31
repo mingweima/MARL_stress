@@ -1,14 +1,15 @@
+from copy import deepcopy
+import os
+
 from ray.rllib.env import MultiAgentEnv
 from Simulator.AgentBank import Asset, Liability, BalanceSheet, AgentBank
 from Simulator.AssetMarket import AssetMarket
 from Simulator.ImpactFunctions import CifuentesImpact
-from copy import deepcopy
-from global_params import BANK_BS_PATH, INITIAL_SHOCK, MARKET_TOTAL_VALUE
-from os import path
+from global_params import INITIAL_SHOCK, MARKET_TOTAL_VALUE
 
 # params
 shock = INITIAL_SHOCK
-bspath = BANK_BS_PATH
+bspath = os.path.dirname(os.path.abspath(__file__)) + '/Bank3.csv'
 
 
 def load_bs():

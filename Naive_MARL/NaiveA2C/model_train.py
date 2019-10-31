@@ -26,7 +26,7 @@ for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
 round_to_print = 500
 average_lifespans = []
 total_equities = []
-for episode in range(20000):
+for episode in range(1500):
     if episode == 0 or episode % round_to_print == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
@@ -77,14 +77,14 @@ plt.sca(axs[0])
 average_lifespans = np.array(average_lifespans).reshape(x_points, av_step)
 means_avg_lifespans = np.mean(average_lifespans, axis=1)
 stds_avg_lifespans = np.std(average_lifespans, axis=1)
-plot_custom_errorbar_plot(range(x_points), means_avg_lifespans, stds_avg_lifespans, color='b')
-plt.xlabel(f'Num episode in {av_step}s')
-plt.ylabel('Every life span of all banks')
+plot_custom_errorbar_plot(range(x_points), means_avg_lifespans, stds_avg_lifespans)
+plt.xlabel(f'Num episode / {av_step}')
+plt.ylabel('Avg life span of all banks')
 plt.sca(axs[1])
 total_equities = np.array(total_equities).reshape(x_points, av_step)
 means_total_equities = np.mean(total_equities, axis=1)
 stds_total_equities = np.std(total_equities, axis=1)
 plot_custom_errorbar_plot(range(x_points), means_total_equities, stds_total_equities)
-plt.xlabel(f'Num episode in {av_step}s')
-plt.ylabel('System total equity')
+plt.xlabel(f'Num episode / {av_step}')
+plt.ylabel('End of episdoe system total equity')
 plt.show()

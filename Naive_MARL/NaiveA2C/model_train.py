@@ -25,6 +25,7 @@ for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
 
 round_to_print = 500
 average_lifespans = []
+total_equities = []
 for episode in range(20000):
     if episode == 0 or episode % round_to_print == 0:
         print(f'=========================================Episode {episode}===============================================')
@@ -65,15 +66,26 @@ for episode in range(20000):
         if play == max_play:
             # print(infos['AVERAGE_LIFESPAN'])
             average_lifespans.append(infos['AVERAGE_LIFESPAN'])
+            total_equities.append(infos['TOTAL_EQUITY'])
 
 setup_matplotlib()
 av_step = 50
 x_points = int(len(average_lifespans)/av_step)
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+fig.suptitle('Learning behavior of bank-agents')
+plt.sca(axs[0])
 average_lifespans = np.array(average_lifespans).reshape(x_points, av_step)
 means_avg_lifespans = np.mean(average_lifespans, axis=1)
 stds_avg_lifespans = np.std(average_lifespans, axis=1)
 plot_custom_errorbar_plot(range(x_points), means_avg_lifespans, stds_avg_lifespans, color='b')
-plt.title('Learning behavior of bank-agents')
 plt.xlabel(f'Num episode in {av_step}s')
-plt.ylabel('Avg lifespan of all banks')
+plt.ylabel('Every life span of all banks')
+plt.sca(axs[0])
+total_equities = np.array(total_equities).reshape(x_points, av_step)
+means_total_equities = np.mean(total_equities, axis=1)
+stds_total_equities = np.std(total_equities, axis=1)
+plot_custom_errorbar_plot(range(x_points), means_total_equities, stds_total_equities)
+plt.xlabel(f'Num episode in {av_step}s')
+plt.ylabel('System total equity')
+>>>>>>> Plot total equity as well
 plt.show()

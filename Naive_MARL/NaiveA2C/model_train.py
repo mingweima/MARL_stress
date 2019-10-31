@@ -1,6 +1,6 @@
-from BankSimEnv import BankSimEnv, CollaborativeBankSimEnv
-from MARL.NaiveA2C.ddpg_agent import Agent
-from MARL.NaiveA2C.util import setup_matplotlib, plot_custom_errorbar_plot
+from BankSimEnv import BankSimEnv
+from Naive_MARL.NaiveA2C.ddpg_agent import Agent
+from Naive_MARL.util import setup_matplotlib, plot_custom_errorbar_plot
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -19,7 +19,7 @@ def MA_obs_to_bank_obs(obs, bank):
 agent_dict = {}
 env = BankSimEnv()
 
-for idx, name in enumerate([f'B0{i}' for i in range(1, 2)]):
+for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
     agent = Agent(state_size=6, action_size=2, random_seed=0, name=name)
     agent_dict[name] = agent
 

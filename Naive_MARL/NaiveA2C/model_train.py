@@ -1,4 +1,4 @@
-from BankSimEnv import BankSimEnv
+from Simulator.BankSimEnv import BankSimEnv
 from Naive_MARL.NaiveA2C.ddpg_agent import Agent
 from Naive_MARL.util import setup_matplotlib, plot_custom_errorbar_plot
 import matplotlib.pyplot as plt
@@ -25,7 +25,7 @@ for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
 
 round_to_print = 500
 average_lifespans = []
-for episode in range(2000):
+for episode in range(20000):
     if episode == 0 or episode % round_to_print == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
@@ -67,7 +67,7 @@ for episode in range(2000):
             average_lifespans.append(infos['AVERAGE_LIFESPAN'])
 
 setup_matplotlib()
-av_step = 20
+av_step = 50
 x_points = int(len(average_lifespans)/av_step)
 average_lifespans = np.array(average_lifespans).reshape(x_points, av_step)
 means_avg_lifespans = np.mean(average_lifespans, axis=1)

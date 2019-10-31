@@ -3,7 +3,7 @@ from Simulator.AgentBank import Asset, Liability, BalanceSheet, AgentBank
 from Simulator.AssetMarket import AssetMarket
 from Simulator.ImpactFunctions import CifuentesImpact
 from copy import deepcopy
-from global_params import BANK_BS_PATH, INITIAL_SHOCK
+from global_params import BANK_BS_PATH, INITIAL_SHOCK, MARKET_TOTAL_VALUE
 from os import path
 # params
 shock = INITIAL_SHOCK
@@ -46,8 +46,8 @@ def load_bs():
 def initialize_asset_market():
     assets = {}
     assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
-        Asset('CASH', 1e6, CifuentesImpact), Asset('CB', 1e5, CifuentesImpact), \
-        Asset('GB', 3e5, CifuentesImpact), Asset('OTHER', 1e5, CifuentesImpact)
+        Asset('CASH', MARKET_TOTAL_VALUE['CASH'], CifuentesImpact), Asset('CB', MARKET_TOTAL_VALUE['CB'], CifuentesImpact), \
+        Asset('GB', MARKET_TOTAL_VALUE['GB'], CifuentesImpact), Asset('OTHER', MARKET_TOTAL_VALUE['OTHER'], CifuentesImpact)
     return AssetMarket(assets)
 
 

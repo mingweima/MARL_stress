@@ -5,6 +5,7 @@ from Simulator.ImpactFunctions import CifuentesImpact
 from copy import deepcopy
 from global_params import BANK_BS_PATH, INITIAL_SHOCK, MARKET_TOTAL_VALUE
 from os import path
+
 # params
 shock = INITIAL_SHOCK
 bspath = BANK_BS_PATH
@@ -26,7 +27,7 @@ def load_bs():
         corp_bonds = debt_sec - gov_bonds
 
         asset = equity / (float(leverage) / 100)
-        cash = 0.0 * asset # assume all cash has already be used up to pay back leverage
+        cash = 0.0 * asset  # assume all cash has already be used up to pay back leverage
         other_asset = asset - debt_sec - cash
 
         liability = asset - equity
@@ -46,8 +47,10 @@ def load_bs():
 def initialize_asset_market():
     assets = {}
     assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
-        Asset('CASH', MARKET_TOTAL_VALUE['CASH'], CifuentesImpact), Asset('CB', MARKET_TOTAL_VALUE['CB'], CifuentesImpact), \
-        Asset('GB', MARKET_TOTAL_VALUE['GB'], CifuentesImpact), Asset('OTHER', MARKET_TOTAL_VALUE['OTHER'], CifuentesImpact)
+        Asset('CASH', MARKET_TOTAL_VALUE['CASH'], CifuentesImpact), Asset('CB', MARKET_TOTAL_VALUE['CB'],
+                                                                          CifuentesImpact), \
+        Asset('GB', MARKET_TOTAL_VALUE['GB'], CifuentesImpact), Asset('OTHER', MARKET_TOTAL_VALUE['OTHER'],
+                                                                      CifuentesImpact)
     return AssetMarket(assets)
 
 
@@ -74,7 +77,6 @@ class BankSimEnv(MultiAgentEnv):
         for bank_name, bank in self.allAgentBanks.items():
             self.initialEquity[bank_name] = deepcopy(bank.get_equity_value())
         obs = {}
-        price_dict = self.AssetMarket.query_price()
         for bank_name, bank in self.allAgentBanks.items():
             obs[bank.BankName] = bank.return_obs()
         return obs
@@ -115,10 +117,10 @@ class BankSimEnv(MultiAgentEnv):
             obs[bank.BankName] = bank.return_obs()
             # return reward
             if bank.IsInsolvent is True:
-                rewards[bank_name] = -10
+                rewards[bank_name] = 5000 * (bank.get_leverage_ratio() - 0.03) + 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 1 + INITIAL_SHOCK)
             else:
-                rewards[bank_name] = 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 0.8)
-            # return dones
+                rewards[bank_name] = 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 1 + INITIAL_SHOCK)
+                # return dones
             if bank.IsInsolvent == True:
                 dones[bank_name] = True
                 self.DefaultBanks.append(bank_name)
@@ -136,7 +138,11 @@ class BankSimEnv(MultiAgentEnv):
             else:
                 infos['AVERAGE_LIFESPAN'] += bank.Day
         infos['AVERAGE_LIFESPAN'] /= len(list(allAgents))
-        infos['TOTAL_EQUITY'] = sum(bank.get_equity_value() for bank in allAgents)
+        infos['TOTAL_EQUITY'] = 0
+        for bank in allAgents:
+            if bank.IsInsolvent:
+                continue
+            infos['TOTAL_EQUITY'] += bank.get_equity_value()
 
         self.Day += 1
         return obs, rewards, dones, infos
@@ -207,9 +213,9 @@ class CollaborativeBankSimEnv(MultiAgentEnv):
             obs[bank.BankName] = bank.return_obs()
             # return reward
             if bank.IsInsolvent is True:
-                central_reward -= 5
+                central_reward -= 10
             else:
-                central_reward += bank.get_equity_value() / self.initialEquity[bank_name]
+                central_reward += 10 * (bank.get_equity_value() / self.initialEquity[bank_name] -1 + INITIAL_SHOCK)
             # return dones
             if bank.IsInsolvent == True:
                 dones[bank_name] = True
@@ -226,24 +232,30 @@ class CollaborativeBankSimEnv(MultiAgentEnv):
         infos['AVERAGE_LIFESPAN'] = 0
         for bank in allAgents:
             if bank.IsInsolvent:
-                infos['AVERAGE_LIFESPAN'] += bank.DeathTime/len(list(allAgents))
+                infos['AVERAGE_LIFESPAN'] += bank.DeathTime
             else:
-                infos['AVERAGE_LIFESPAN'] += bank.Day/len(list(allAgents))
+                infos['AVERAGE_LIFESPAN'] += bank.Day
+        infos['AVERAGE_LIFESPAN'] /= len(list(allAgents))
+        infos['TOTAL_EQUITY'] = 0
+        for bank in allAgents:
+            if bank.IsInsolvent:
+                continue
+            infos['TOTAL_EQUITY'] += bank.get_equity_value()
 
         self.Day += 1
         return obs, rewards, dones, infos
-
-
 
 
 if __name__ == '__main__':
     env = BankSimEnv()
     init_obs = env.reset()
 
+
     def stupid_action():
         action = {}
         action['CB'], action['GB'] = 0.01, 0.01
         return action
+
 
     play, max_play = 0, 20
     num_default = []
@@ -264,8 +276,3 @@ if __name__ == '__main__':
     # plt.ylabel('Number of defaults')
     # plt.show()
     #
-
-
-
-
-

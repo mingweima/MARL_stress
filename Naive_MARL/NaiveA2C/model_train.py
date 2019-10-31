@@ -1,4 +1,4 @@
-from Simulator.BankSimEnv import BankSimEnv
+from Simulator.BankSimEnv import BankSimEnv, CollaborativeBankSimEnv
 from Naive_MARL.NaiveA2C.ddpg_agent import Agent
 from Naive_MARL.util import setup_matplotlib, plot_custom_errorbar_plot
 import matplotlib.pyplot as plt
@@ -19,14 +19,14 @@ def MA_obs_to_bank_obs(obs, bank):
 agent_dict = {}
 env = BankSimEnv()
 
-for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
+for idx, name in enumerate([f'B0{i}' for i in range(1, 2)]):
     agent = Agent(state_size=6, action_size=2, random_seed=0, name=name)
     agent_dict[name] = agent
 
-round_to_print = 500
+round_to_print = 100
 average_lifespans = []
 total_equities = []
-for episode in range(1500):
+for episode in range(20000):
     if episode == 0 or episode % round_to_print == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
@@ -44,7 +44,7 @@ for episode in range(1500):
             my_obs = MA_obs_to_bank_obs(current_obs, bank)
             current_obs[bank_name] = my_obs
             # choose action
-            actions[bank_name] = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
+            actions[bank_name] = agent_dict[bank_name].act(current_obs[bank_name], add_noise=True, eps=0.005)
             # print(episode, play, bank_name, actions[bank_name])
         # convert actions
         actions_dict = {}
@@ -53,7 +53,6 @@ for episode in range(1500):
             action_dict['CB'], action_dict['GB'] = action[0], action[1]
             actions_dict[name] = action_dict
         new_obs, rewards, dones, infos = env.step(actions_dict)
-        # print(rewards)
         for bank_name, bank in env.allAgentBanks.items():
             if bank_name in env.DefaultBanks:
                 continue
@@ -69,10 +68,10 @@ for episode in range(1500):
             total_equities.append(infos['TOTAL_EQUITY'])
 
 setup_matplotlib()
-av_step = 50
+av_step = 100
 x_points = int(len(average_lifespans)/av_step)
-fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-fig.suptitle('Learning behavior of bank-agents')
+fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+# fig.suptitle(f'Learning behavior: simulation with {len(list(agent_dict.keys()))} banks')
 plt.sca(axs[0])
 average_lifespans = np.array(average_lifespans).reshape(x_points, av_step)
 means_avg_lifespans = np.mean(average_lifespans, axis=1)
@@ -86,5 +85,5 @@ means_total_equities = np.mean(total_equities, axis=1)
 stds_total_equities = np.std(total_equities, axis=1)
 plot_custom_errorbar_plot(range(x_points), means_total_equities, stds_total_equities)
 plt.xlabel(f'Num episode / {av_step}')
-plt.ylabel('End of episdoe system total equity')
+plt.ylabel('End of episode system total equity')
 plt.show()

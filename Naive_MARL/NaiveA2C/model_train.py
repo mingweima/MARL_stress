@@ -44,6 +44,7 @@ for episode in range(50000):
             current_obs[bank_name] = my_obs
             # choose action
             actions[bank_name] = agent_dict[bank_name].act(current_obs[bank_name], add_noise=False)
+            # print(episode, play, bank_name, actions[bank_name])
         # convert actions
         actions_dict = {}
         for name, action in actions.items():

@@ -1,5 +1,5 @@
 #  A bank that has a balance sheet. It does not have any decision making capability (Brain)
-
+from copy import deepcopy
 
 class Asset:
     def __init__(self, type, quantity, impact_function):
@@ -35,7 +35,7 @@ class AgentBank:
         self.BankName = bank_name
         self.AssetMarket = asset_market
         self.BS = balance_sheet
-        self.initialBS = balance_sheet
+        self.initialBS = deepcopy(balance_sheet)
         self.LeverageMin = 0.03
         self.DaysInsolvent = 0
         self.IsInsolvent = False

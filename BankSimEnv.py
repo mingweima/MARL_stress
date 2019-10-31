@@ -2,6 +2,7 @@ from ray.rllib.env import MultiAgentEnv
 from AgentBank import Asset, Liability, BalanceSheet, AgentBank
 from AssetMarket import AssetMarket
 from ImpactFunctions import CifuentesImpact
+from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -73,7 +74,7 @@ class BankSimEnv(MultiAgentEnv):
             self.allAgentBanks[bank_name] = AgentBank(bank_name, self.AssetMarket, BS)
         self.AssetMarket.apply_initial_shock('GB', shock)
         for bank_name, bank in self.allAgentBanks.items():
-            self.initialEquity[bank_name] = bank.get_equity_value()
+            self.initialEquity[bank_name] = deepcopy(bank.get_equity_value())
         obs = {}
         price_dict = self.AssetMarket.query_price()
         for bank_name, bank in self.allAgentBanks.items():
@@ -118,7 +119,7 @@ class BankSimEnv(MultiAgentEnv):
             if bank.IsInsolvent is True:
                 rewards[bank_name] = -10
             else:
-                rewards[bank_name] = bank.get_equity_value() / self.initialEquity[bank_name]
+                rewards[bank_name] = 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 0.8)
             # return dones
             if bank.IsInsolvent == True:
                 dones[bank_name] = True
@@ -140,6 +141,97 @@ class BankSimEnv(MultiAgentEnv):
         self.Day += 1
         return obs, rewards, dones, infos
 
+
+class CollaborativeBankSimEnv(MultiAgentEnv):
+    def __init__(self):
+        self.allAgentBanks = {}
+        self.initialEquity = {}
+        self.DefaultBanks = []  # list of names that has defaulted
+        self.AssetMarket = initialize_asset_market()
+        self.Day = 0
+
+    def reset(self):
+        """Resets the env and returns observations from ready agents.
+        Returns:
+            obs (dict): New observations for each ready agent.
+        """
+        self.allAgentBanks = {}
+        self.DefaultBanks = []  # list of names that has defaulted
+        self.AssetMarket = initialize_asset_market()
+        init_balance_sheets = load_bs()
+        for bank_name, BS in init_balance_sheets.items():
+            self.allAgentBanks[bank_name] = AgentBank(bank_name, self.AssetMarket, BS)
+        self.AssetMarket.apply_initial_shock('GB', shock)
+        for bank_name, bank in self.allAgentBanks.items():
+            self.initialEquity[bank_name] = bank.get_equity_value()
+        obs = {}
+        price_dict = self.AssetMarket.query_price()
+        for bank_name, bank in self.allAgentBanks.items():
+            obs[bank.BankName] = bank.return_obs()
+        return obs
+
+    def step(self, action_dict):
+        # action_dict: {AgentName: {TYPE: QTY}}
+        """Returns observations from ready agents.
+        The returns are dicts mapping from agent_id strings to values. The
+        number of agents in the env can vary over time.
+        Returns
+        -------
+            obs (dict): New observations for each ready agent.
+            rewards (dict): Reward values for each ready agent. If the
+                episode is just started, the value will be None.
+            dones (dict): Done values for each ready agent. The special key
+                "__all__" (required) is used to indicate env termination.
+            infos (dict): Optional info values for each agent id.
+        """
+        obs, rewards, dones, infos = {}, {}, {}, {}
+        name_bank_list = self.allAgentBanks.items()
+        central_reward = 0
+        for bank_name, bank in name_bank_list:
+            if bank_name in self.DefaultBanks:
+                continue
+            if bank.IsInsolvent is True:
+                # already insolvent banks dont do any actions
+                action_dict[bank_name] = {}
+            # update action_dict to the real actions for alive banks
+            action_dict[bank_name] = bank.day_trade(action_dict[bank_name])
+        # pool all orders and send to central clearing
+        new_prices = self.AssetMarket.process_orders(self.allAgentBanks, action_dict)
+        for bank_name, bank in name_bank_list:
+            if bank_name in self.DefaultBanks:
+                continue
+            if bank.IsInsolvent is False:
+                bank.BS.Liability['LOAN'].Quantity -= self.AssetMarket.convert_to_cash(bank, action_dict[bank_name])
+                bank.BS.sell_action(action_dict[bank_name])
+            # return obs
+            obs[bank.BankName] = bank.return_obs()
+            # return reward
+            if bank.IsInsolvent is True:
+                central_reward -= 5
+            else:
+                central_reward += bank.get_equity_value() / self.initialEquity[bank_name]
+            # return dones
+            if bank.IsInsolvent == True:
+                dones[bank_name] = True
+                self.DefaultBanks.append(bank_name)
+                # print(f'Bank {bank_name} defaults! Leverage is {bank.get_leverage_ratio()}!')
+            else:
+                dones[bank_name] = False
+        for bank_name, bank in name_bank_list:
+            rewards[bank_name] = central_reward
+
+        infos['ASSET_PRICES'], infos['NUM_DEFAULT'] = new_prices, len(self.DefaultBanks)
+        allAgents = self.allAgentBanks.values()
+
+        infos['AVERAGE_LIFESPAN'] = 0
+        for bank in allAgents:
+            if bank.IsInsolvent:
+                infos['AVERAGE_LIFESPAN'] += bank.DeathTime/len(list(allAgents))
+            else:
+                infos['AVERAGE_LIFESPAN'] += bank.Day/len(list(allAgents))
+
+        self.Day += 1
+        return obs, rewards, dones, infos
 
 
 

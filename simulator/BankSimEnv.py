@@ -2,9 +2,9 @@ from copy import deepcopy
 import os
 
 #from ray.rllib.env import MultiAgentEnv
-from Simulator.AgentBank import Asset, Liability, BalanceSheet, AgentBank
-from Simulator.AssetMarket import AssetMarket
-from Simulator.ImpactFunctions import CifuentesImpact
+from simulator.AgentBank import Asset, Liability, BalanceSheet, AgentBank
+from simulator.AssetMarket import AssetMarket
+from simulator.ImpactFunctions import CifuentesImpact
 from global_params import INITIAL_SHOCK, MARKET_TOTAL_VALUE
 
 # params

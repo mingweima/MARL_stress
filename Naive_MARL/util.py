@@ -16,7 +16,7 @@ def setup_matplotlib():
     plt.rc('savefig', dpi=200)
     return _cycler
 
-def plot_custom_errorbar_plot(x, y, std, use_marker=True, color=None, marker=None, label=''):
+def plot_custom_errorbar_plot(x, y, std, use_marker=False, color=None, marker=None, label=''):
     if color is None:
         ax = plt.gca()
         _cc = next(ax._get_lines.prop_cycler)

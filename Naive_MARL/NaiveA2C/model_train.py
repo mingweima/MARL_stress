@@ -67,12 +67,13 @@ for episode in range(2000):
             average_lifespans.append(infos['AVERAGE_LIFESPAN'])
 
 setup_matplotlib()
-x_points = int(len(average_lifespans)/20)
-average_lifespans = np.array(average_lifespans).reshape(x_points, 20)
+av_step = 20
+x_points = int(len(average_lifespans)/av_step)
+average_lifespans = np.array(average_lifespans).reshape(x_points, av_step)
 means_avg_lifespans = np.mean(average_lifespans, axis=1)
 stds_avg_lifespans = np.std(average_lifespans, axis=1)
-plot_custom_errorbar_plot(range(x_points), means_avg_lifespans, stds_avg_lifespans)
+plot_custom_errorbar_plot(range(x_points), means_avg_lifespans, stds_avg_lifespans, color='b')
 plt.title('Learning behavior of bank-agents')
-plt.xlabel('Num episode in hundreds')
-plt.ylabel('Every life span of all banks')
+plt.xlabel(f'Num episode in {av_step}s')
+plt.ylabel('Avg lifespan of all banks')
 plt.show()

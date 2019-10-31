@@ -38,7 +38,7 @@ class Actor(nn.Module):
         """Build an actor (policy) network that maps states -> actions."""
         x = torch.relu(self.fc1(state))
         x = torch.relu(self.fc2(x))
-        return torch.sigmoid(self.fc3(x))
+        return torch.tanh(self.fc3(x))
 
 
 class Critic(nn.Module):

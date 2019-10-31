@@ -25,7 +25,7 @@ for idx, name in enumerate([f'B0{i}' for i in range(1, 3)]):
 
 round_to_print = 500
 average_lifespans = []
-for episode in range(50000):
+for episode in range(2000):
     if episode == 0 or episode % round_to_print == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
@@ -67,9 +67,12 @@ for episode in range(50000):
             average_lifespans.append(infos['AVERAGE_LIFESPAN'])
 
 setup_matplotlib()
-x_points = int(len(average_lifespans)/100)
-average_lifespans = np.array(average_lifespans).reshape(x_points, 100)
+x_points = int(len(average_lifespans)/20)
+average_lifespans = np.array(average_lifespans).reshape(x_points, 20)
 means_avg_lifespans = np.mean(average_lifespans, axis=1)
 stds_avg_lifespans = np.std(average_lifespans, axis=1)
 plot_custom_errorbar_plot(range(x_points), means_avg_lifespans, stds_avg_lifespans)
+plt.title('Learning behavior of bank-agents')
+plt.xlabel('Num episode in hundreds')
+plt.ylabel('Every life span of all banks')
 plt.show()

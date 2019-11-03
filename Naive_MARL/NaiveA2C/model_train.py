@@ -1,9 +1,9 @@
-from Simulator.BankSimEnv import BankSimEnv, CollaborativeBankSimEnv
-from Naive_MARL.NaiveA2C.ddpg_agent import Agent
-from Naive_MARL.util import setup_matplotlib, plot_custom_errorbar_plot
 import matplotlib.pyplot as plt
 import numpy as np
 
+from simulator.BankSimEnv import BankSimEnv, CollaborativeBankSimEnv
+from Naive_MARL.NaiveA2C.ddpg_agent import Agent
+from Naive_MARL.util import setup_matplotlib, plot_custom_errorbar_plot
 
 def MA_obs_to_bank_obs(obs, bank):
     # obs is (bank.AssetMarket.query_price(), bank.BS.Asset, bank.BS.Liability, bank.get_leverage_ratio(), bank.initialBS)
@@ -26,7 +26,7 @@ for idx, name in enumerate([f'B0{i}' for i in range(1, 2)]):
 round_to_print = 100
 average_lifespans = []
 total_equities = []
-for episode in range(20000):
+for episode in range(1000):
     if episode == 0 or episode % round_to_print == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()

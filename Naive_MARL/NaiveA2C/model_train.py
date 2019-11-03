@@ -4,6 +4,7 @@ import numpy as np
 from simulator.BankSimEnv import BankSimEnv, CollaborativeBankSimEnv
 from Naive_MARL.NaiveA2C.ddpg_agent import Agent
 from Naive_MARL.util import setup_matplotlib, plot_custom_errorbar_plot
+from config import GAME_PARAMS
 
 def MA_obs_to_bank_obs(obs, bank):
     # obs is (bank.AssetMarket.query_price(), bank.BS.Asset, bank.BS.Liability, bank.get_leverage_ratio(), bank.initialBS)
@@ -26,13 +27,13 @@ for idx, name in enumerate([f'B0{i}' for i in range(1, 2)]):
 round_to_print = 100
 average_lifespans = []
 total_equities = []
-for episode in range(1000):
+for episode in range(GAME_PARAMS.EPISODES):
     if episode == 0 or episode % round_to_print == 0:
         print(f'=========================================Episode {episode}===============================================')
     current_obs = env.reset()
     play, max_play = 0, 5
     num_default = []
-    while play < max_play:
+    while play < GAME_PARAMS.MAX_PLAY:
         actions = {}
         for bank_name, bank in env.allAgentBanks.items():
             if bank_name in env.DefaultBanks:

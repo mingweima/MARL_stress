@@ -1,5 +1,12 @@
 from copy import deepcopy
-from global_params import GAME_PARAMS
+
+
+from simulator.AgentBank import Asset, Liability, BalanceSheet, AgentBank
+from simulator.AssetMarket import AssetMarket
+from simulator.ImpactFunctions import CifuentesImpact
+
+
+from config import GAME_PARAMS
 
 # set params
 shock = GAME_PARAMS.INITIAL_SHOCK

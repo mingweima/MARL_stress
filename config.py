@@ -35,7 +35,7 @@ ONE_AGENT_FORCE_SALE = GameParams(
                        INITIAL_SHOCK=0.0,
                        MARKET_TOTAL_VALUE={'CASH': 1, 'CB': 1e6, 'GB': 1e6, 'OTHER': 1},
                        MAX_PLAY=5,
-                       EPISDOES=5000,
+                       EPISDOES=8000,
                        )
 
 

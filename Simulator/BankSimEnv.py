@@ -3,12 +3,12 @@ from Simulator.AgentBank import Asset, Liability, BalanceSheet, AgentBank
 from Simulator.AssetMarket import AssetMarket
 from Simulator.ImpactFunctions import CifuentesImpact
 from copy import deepcopy
-from global_params import BANK_BS_PATH, INITIAL_SHOCK, MARKET_TOTAL_VALUE
-from os import path
+from global_params import GAME_PARAMS
 
-# params
-shock = INITIAL_SHOCK
-bspath = BANK_BS_PATH
+# set params
+shock = GAME_PARAMS.INITIAL_SHOCK
+bspath = GAME_PARAMS.BANK_BS_PATH
+MARKET_TOTAL_VALUE = GAME_PARAMS.MARKET_TOTAL_VALUE
 
 
 def load_bs():
@@ -117,9 +117,9 @@ class BankSimEnv(MultiAgentEnv):
             obs[bank.BankName] = bank.return_obs()
             # return reward
             if bank.IsInsolvent is True:
-                rewards[bank_name] = 5000 * (bank.get_leverage_ratio() - 0.03) + 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 1 + INITIAL_SHOCK)
+                rewards[bank_name] = 5000 * (bank.get_leverage_ratio() - 0.03) + 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 1 + shock)
             else:
-                rewards[bank_name] = 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 1 + INITIAL_SHOCK)
+                rewards[bank_name] = 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 1 + shock)
                 # return dones
             if bank.IsInsolvent == True:
                 dones[bank_name] = True

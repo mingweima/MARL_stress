@@ -46,4 +46,4 @@ EBA_2018_SHOCK = GameParams(BANK_BS_PATH='/simulator/initial_BS/' + 'EBA_2018.cs
                       EPISDOES=1000,
                       )
 
-GAME_PARAMS = EBA_2018_SHOCK
+GAME_PARAMS = TWO_AGENT_SAFE

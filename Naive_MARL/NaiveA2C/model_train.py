@@ -12,15 +12,18 @@ def MA_obs_to_bank_obs(obs, bank):
     # print(f'BANK OBS of {bank.BankName}', bank_obs)
     cb_price, gb_price =  bank_obs[0]['CB'], bank_obs[0]['GB']
     # print(bank_obs[4].Asset['CB'].Quantity, bank_obs[4].Asset['GB'].Quantity, bank_obs[4].Liability['LOAN'].Quantity)
-    cb_left, gb_left, loans_left = bank_obs[1]['CB'].Quantity/bank_obs[4].Asset['CB'].Quantity, bank_obs[1]['CB'].Quantity/bank_obs[4].Asset['GB'].Quantity, bank_obs[2]['LOAN'].Quantity/bank_obs[4].Liability['LOAN'].Quantity
+    cb_left, gb_left, loans_left = bank_obs[1]['CB'].Quantity/(1+bank_obs[4].Asset['CB'].Quantity), bank_obs[1]['CB'].Quantity/(1+bank_obs[4].Asset['GB'].Quantity), bank_obs[2]['LOAN'].Quantity/(1+bank_obs[4].Liability['LOAN'].Quantity)
     leverage = bank_obs[3]
     return np.asarray([cb_price, gb_price, cb_left, gb_left, loans_left, leverage*30])
 
 
 agent_dict = {}
 env = BankSimEnv()
+env.reset()
 
-for idx, name in enumerate([f'B0{i}' for i in range(1, 2)]):
+bank_names = list(env.allAgentBanks.keys())
+print(bank_names)
+for idx, name in enumerate(bank_names):
     agent = Agent(state_size=6, action_size=2, random_seed=0, name=name)
     agent_dict[name] = agent
 

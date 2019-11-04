@@ -40,4 +40,13 @@ ONE_AGENT_FORCE_SALE = GameParams(
                        )
 
 
-GAME_PARAMS = ONE_AGENT_FORCE_SALE
+EBA_2018 = GameParams(
+                           BANK_BS_PATH='/simulator/initial_BS/' + 'EBA_2018.csv',
+                           CifuentesImpact_LAMBDA=0.05,
+                           INITIAL_SHOCK=0.10,
+                           MARKET_TOTAL_VALUE={'CASH': 1, 'CB': 1e6, 'GB': 1e6, 'OTHER': 1},
+                           MAX_PLAY=5,
+                           EPISDOES=1000,
+                       )
+
+GAME_PARAMS = EBA_2018

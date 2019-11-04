@@ -22,7 +22,7 @@ env = BankSimEnv()
 env.reset()
 
 bank_names = list(env.allAgentBanks.keys())
-print(bank_names)
+print(f'Game simulations starting! All {len(bank_names)} participants are: {bank_names}.')
 for idx, name in enumerate(bank_names):
     agent = Agent(state_size=6, action_size=2, random_seed=0, name=name)
     agent_dict[name] = agent
@@ -75,7 +75,7 @@ setup_matplotlib()
 av_step = 100
 x_points = int(len(average_lifespans)/av_step)
 fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-# fig.suptitle(f'Learning behavior: simulation with {len(list(agent_dict.keys()))} banks')
+fig.suptitle(f'Learning behavior: simulation with {len(list(agent_dict.keys()))} banks')
 plt.sca(axs[0])
 average_lifespans = np.array(average_lifespans).reshape(x_points, av_step)
 means_avg_lifespans = np.mean(average_lifespans, axis=1)

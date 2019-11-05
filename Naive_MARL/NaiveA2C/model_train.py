@@ -90,4 +90,5 @@ plot_custom_errorbar_plot(range(x_points), means_total_equities, stds_total_equi
 plt.xlabel(f'Num episode / {av_step}')
 plt.ylabel('End of episode system total equity')
 fig.suptitle(f'Learning behavior: simulation with {len(list(agent_dict.keys()))} banks')
+plt.subplots_adjust(top=0.85)
 plt.show()

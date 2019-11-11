@@ -2,10 +2,9 @@
 from copy import deepcopy
 
 class Asset:
-    def __init__(self, type, quantity, impact_function):
+    def __init__(self, type, quantity):
         self.Type = type
         self.Quantity = quantity
-        self.ImpactFunction = impact_function
 
 
 class Liability:

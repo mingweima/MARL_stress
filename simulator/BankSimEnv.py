@@ -37,8 +37,8 @@ def load_bs():
         loan = liability
 
         assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
-            Asset('CASH', cash, CifuentesImpact), Asset('CB', corp_bonds, CifuentesImpact), \
-            Asset('GB', gov_bonds, CifuentesImpact), Asset('OTHER', other_asset, CifuentesImpact)
+            Asset('CASH', cash), Asset('CB', corp_bonds), \
+            Asset('GB', gov_bonds), Asset('OTHER', other_asset)
 
         liabilities['LOAN'] = Liability('LOAN', loan)
 
@@ -50,11 +50,9 @@ def load_bs():
 def initialize_asset_market():
     assets = {}
     assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
-        Asset('CASH', MARKET_TOTAL_VALUE['CASH'], CifuentesImpact), Asset('CB', MARKET_TOTAL_VALUE['CB'],
-                                                                          CifuentesImpact), \
-        Asset('GB', MARKET_TOTAL_VALUE['GB'], CifuentesImpact), Asset('OTHER', MARKET_TOTAL_VALUE['OTHER'],
-                                                                      CifuentesImpact)
-    return AssetMarket(assets)
+        Asset('CASH', MARKET_TOTAL_VALUE['CASH']), Asset('CB', MARKET_TOTAL_VALUE['CB']), \
+        Asset('GB', MARKET_TOTAL_VALUE['GB']), Asset('OTHER', MARKET_TOTAL_VALUE['OTHER'])
+    return AssetMarket(assets, CifuentesImpact)
 
 
 class BankSimEnv:#(MultiAgentEnv):

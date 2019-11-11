@@ -2,11 +2,12 @@ from collections import defaultdict
 
 
 class AssetMarket:
-    def __init__(self, assets):
+    def __init__(self, assets, impact_function):
         # specify which assets to clear and total amount of each asset
         self.Assets = assets  # a dictionary { TYPE: Asset(TYPE, TOTAL_QTY, ImpactFunction) }
         self.prices = defaultdict(lambda: 1.0)  # initialize all prices as 1.0
         self.days = 0  # trading days elapsed
+        self.impact_function = impact_function
 
     def query_price(self):
         # returns prices of all assets as dict {TYPE: PRICE}
@@ -40,8 +41,8 @@ class AssetMarket:
                     qty += bank_order_dict[atype] * allBanks[bank_name].BS.Asset[atype].Quantity
                 except KeyError:
                     pass
-            fraction_to_sell = qty/asset.Quantity
-            new_price = asset.ImpactFunction(current_prices[atype], fraction_to_sell)
+            fraction_to_sell = qty / asset.Quantity
+            new_price = self.impact_function(current_prices[atype], fraction_to_sell)
             self.prices[atype] = new_price
         return self.query_price()
 

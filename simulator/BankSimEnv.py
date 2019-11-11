@@ -101,7 +101,7 @@ class BankSimEnv:#(MultiAgentEnv):
         for bank_name, bank in name_bank_list:
             if bank_name in self.DefaultBanks:
                 continue
-            if bank.IsInsolvent is True:
+            if bank.alive is False:
                 # already insolvent banks dont do any actions
                 action_dict[bank_name] = {}
             # update action_dict to the real actions for alive banks
@@ -111,18 +111,18 @@ class BankSimEnv:#(MultiAgentEnv):
         for bank_name, bank in name_bank_list:
             if bank_name in self.DefaultBanks:
                 continue
-            if bank.IsInsolvent is False:
+            if bank.alive is True:
                 bank.BS.Liability['LOAN'].Quantity -= self.AssetMarket.convert_to_cash(bank, action_dict[bank_name])
                 bank.BS.sell_action(action_dict[bank_name])
             # return obs
             obs[bank.BankName] = bank.return_obs()
             # return reward
-            if bank.IsInsolvent is True:
+            if bank.alive is False:
                 rewards[bank_name] = 5000 * (bank.get_leverage_ratio() - 0.03) + 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 1 + shock)
             else:
                 rewards[bank_name] = 10 * (bank.get_equity_value() / self.initialEquity[bank_name] - 1 + shock)
                 # return dones
-            if bank.IsInsolvent == True:
+            if bank.alive == False:
                 dones[bank_name] = True
                 self.DefaultBanks.append(bank_name)
                 # print(f'Bank {bank_name} defaults! Leverage is {bank.get_leverage_ratio()}!')
@@ -134,14 +134,14 @@ class BankSimEnv:#(MultiAgentEnv):
 
         infos['AVERAGE_LIFESPAN'] = 0
         for bank in allAgents:
-            if bank.IsInsolvent:
+            if not bank.alive:
                 infos['AVERAGE_LIFESPAN'] += bank.DeathTime
             else:
                 infos['AVERAGE_LIFESPAN'] += bank.Day
         infos['AVERAGE_LIFESPAN'] /= len(list(allAgents))
         infos['TOTAL_EQUITY'] = 0
         for bank in allAgents:
-            if bank.IsInsolvent:
+            if not bank.alive:
                 continue
             infos['TOTAL_EQUITY'] += bank.get_equity_value()
 
@@ -197,7 +197,7 @@ class CollaborativeBankSimEnv: #(MultiAgentEnv):
         for bank_name, bank in name_bank_list:
             if bank_name in self.DefaultBanks:
                 continue
-            if bank.IsInsolvent is True:
+            if bank.alive is False:
                 # already insolvent banks dont do any actions
                 action_dict[bank_name] = {}
             # update action_dict to the real actions for alive banks
@@ -207,18 +207,18 @@ class CollaborativeBankSimEnv: #(MultiAgentEnv):
         for bank_name, bank in name_bank_list:
             if bank_name in self.DefaultBanks:
                 continue
-            if bank.IsInsolvent is False:
+            if bank.alive is True:
                 bank.BS.Liability['LOAN'].Quantity -= self.AssetMarket.convert_to_cash(bank, action_dict[bank_name])
                 bank.BS.sell_action(action_dict[bank_name])
             # return obs
             obs[bank.BankName] = bank.return_obs()
             # return reward
-            if bank.IsInsolvent is True:
+            if bank.alive is False:
                 central_reward -= 10
             else:
                 central_reward += 10 * (bank.get_equity_value() / self.initialEquity[bank_name] -1 + INITIAL_SHOCK)
             # return dones
-            if bank.IsInsolvent == True:
+            if bank.alive is False:
                 dones[bank_name] = True
                 self.DefaultBanks.append(bank_name)
                 # print(f'Bank {bank_name} defaults! Leverage is {bank.get_leverage_ratio()}!')
@@ -232,14 +232,14 @@ class CollaborativeBankSimEnv: #(MultiAgentEnv):
 
         infos['AVERAGE_LIFESPAN'] = 0
         for bank in allAgents:
-            if bank.IsInsolvent:
+            if not bank.alive:
                 infos['AVERAGE_LIFESPAN'] += bank.DeathTime
             else:
                 infos['AVERAGE_LIFESPAN'] += bank.Day
         infos['AVERAGE_LIFESPAN'] /= len(list(allAgents))
         infos['TOTAL_EQUITY'] = 0
         for bank in allAgents:
-            if bank.IsInsolvent:
+            if not bank.alive:
                 continue
             infos['TOTAL_EQUITY'] += bank.get_equity_value()
 

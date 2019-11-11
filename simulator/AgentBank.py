@@ -37,7 +37,7 @@ class AgentBank:
         self.initialBS = deepcopy(balance_sheet)
         self.LeverageMin = 0.03
         self.DaysInsolvent = 0
-        self.IsInsolvent = False
+        self.alive = True
         self.Day = 0
         self.DeathTime = 0
 
@@ -70,7 +70,7 @@ class AgentBank:
         if (self.get_leverage_ratio() > minlev) or self.Day == 0:
             pass
         else:
-            self.IsInsolvent = True
+            self.alive = False
             # print(f"Bank {self.BankName} Defualts at Day {self.Day}!")
             # set all QTY to 1 (liquidate all tradables)
             for atype, qty in action.items():

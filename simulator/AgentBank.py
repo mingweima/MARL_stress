@@ -77,14 +77,3 @@ class AgentBank:
                 action[atype] = 1
         self.Day += 1
         return action
-
-
-
-
-
-
-
-
-
-
-

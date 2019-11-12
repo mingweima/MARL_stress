@@ -12,7 +12,7 @@ def MA_obs_to_bank_obs(obs, bank):
     # print(f'BANK OBS of {bank.BankName}', bank_obs)
     cb_price, gb_price =  bank_obs[0]['CB'], bank_obs[0]['GB']
     # print(bank_obs[4].Asset['CB'].Quantity, bank_obs[4].Asset['GB'].Quantity, bank_obs[4].Liability['LOAN'].Quantity)
-    cb_left, gb_left, loans_left = bank_obs[1]['CB'].Quantity/(1+bank_obs[4].Asset['CB'].Quantity), bank_obs[1]['CB'].Quantity/(1+bank_obs[4].Asset['GB'].Quantity), bank_obs[2]['LOAN'].Quantity/(1+bank_obs[4].Liability['LOAN'].Quantity)
+    cb_left, gb_left, loans_left = bank_obs[1]['CB'].Quantity/(1+bank_obs[4].Asset['CB'].Quantity), bank_obs[1]['GB'].Quantity/(1+bank_obs[4].Asset['GB'].Quantity), bank_obs[2]['LOAN'].Quantity/(1+bank_obs[4].Liability['LOAN'].Quantity)
     leverage = bank_obs[3]
     return np.asarray([cb_price, gb_price, cb_left, gb_left, loans_left, leverage*30])
 

@@ -48,7 +48,7 @@ for episode in range(GAME_PARAMS.EPISODES):
             my_obs = MA_obs_to_bank_obs(current_obs, bank)
             current_obs[bank_name] = my_obs
             # choose action
-            actions[bank_name] = agent_dict[bank_name].act(current_obs[bank_name], add_noise=True, eps=0.005)
+            actions[bank_name] = agent_dict[bank_name].act(current_obs[bank_name].astype(float), add_noise=True, eps=0.005)
             # print(episode, play, bank_name, actions[bank_name])
         # convert actions
         actions_dict = {}

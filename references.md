@@ -14,4 +14,4 @@
 - DeepRL algos in pytorch https://github.com/ShangtongZhang/DeepRL
 - (famous result) DOOM pytorch https://github.com/glample/Arnold https://www.cs.cmu.edu/~dchaplot/papers/aaai17_fps_games.pdf
 - Centralized critic. COMA https://arxiv.org/abs/1705.08926 https://github.com/oxwhirl/pymarl/blob/master/src/modules/critics/coma.py
-
+- Learning to communicate pytorch https://github.com/minqi/learning-to-communicate-pytorch

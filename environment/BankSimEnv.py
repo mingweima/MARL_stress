@@ -1,9 +1,9 @@
 from copy import deepcopy
 
 
-from simulator.AgentBank import Asset, Liability, BalanceSheet, AgentBank
-from simulator.AssetMarket import AssetMarket
-from simulator.ImpactFunctions import CifuentesImpact
+from environment.AgentBank import Asset, Liability, BalanceSheet, AgentBank
+from environment.AssetMarket import AssetMarket
+from environment.ImpactFunctions import CifuentesImpact
 
 
 from config import GAME_PARAMS

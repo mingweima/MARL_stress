@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from simulator.BankSimEnv import BankSimEnv, CollaborativeBankSimEnv
+from environment.BankSimEnv import BankSimEnv, CollaborativeBankSimEnv
 from Naive_MARL.NaiveA2C.ddpg_agent import Agent
 from Naive_MARL.util import setup_matplotlib, plot_custom_errorbar_plot
 from config import GAME_PARAMS

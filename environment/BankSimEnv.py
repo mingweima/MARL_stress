@@ -1,5 +1,5 @@
 from copy import deepcopy
-
+import numpy as np
 
 from environment.AgentBank import Asset, Liability, BalanceSheet, AgentBank
 from environment.AssetMarket import AssetMarket
@@ -23,6 +23,7 @@ def load_bs():
         # extract different asset/liability types from the doc
         row = bs.split(' ')
         bank_name, equity, leverage, debt_sec, gov_bonds = row
+        bank_name = int(bank_name)
         equity = float(equity)
 
         debt_sec = float(debt_sec)
@@ -56,12 +57,13 @@ def initialize_asset_market():
 
 
 class BankSimEnv:#(MultiAgentEnv):
-    def __init__(self):
+    def __init__(self, shock):
         self.allAgentBanks = {}
         self.initialEquity = {}
         self.DefaultBanks = []  # list of names that has defaulted
         self.AssetMarket = initialize_asset_market()
         self.Day = 0
+        self.shock = shock
 
     def reset(self):
         """Resets the env and returns observations from ready agents.
@@ -74,7 +76,7 @@ class BankSimEnv:#(MultiAgentEnv):
         init_balance_sheets = load_bs()
         for bank_name, BS in init_balance_sheets.items():
             self.allAgentBanks[bank_name] = AgentBank(bank_name, self.AssetMarket, BS)
-        self.AssetMarket.apply_initial_shock('GB', shock)
+        self.AssetMarket.apply_initial_shock('GB', self.shock)
         for bank_name, bank in self.allAgentBanks.items():
             self.initialEquity[bank_name] = deepcopy(bank.get_equity_value())
         obs = {}

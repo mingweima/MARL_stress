@@ -23,7 +23,7 @@ class GameParams(object):
 TWO_AGENT_SAFE = GameParams(
     BANK_BS_PATH='/simulator/initial_BS/' + 'two_agent_safe.csv',
     CifuentesImpact_LAMBDA=0.1,
-    INITIAL_SHOCK=0.0,
+    INITIAL_SHOCK=0.1,
     MARKET_TOTAL_VALUE={'CASH': 1, 'CB': 1e6, 'GB': 1e6, 'OTHER': 1},
     MAX_PLAY=5,
     EPISDOES=1000,
@@ -32,7 +32,7 @@ TWO_AGENT_SAFE = GameParams(
 ONE_AGENT_FORCE_SALE = GameParams(
     BANK_BS_PATH='/simulator/initial_BS/' + 'single_bank_game.csv',
     CifuentesImpact_LAMBDA=0.01,
-    INITIAL_SHOCK=0.0,
+    INITIAL_SHOCK=0.1,
     MARKET_TOTAL_VALUE={'CASH': 1, 'CB': 1e6, 'GB': 1e6, 'OTHER': 1},
     MAX_PLAY=5,
     EPISDOES=8000,

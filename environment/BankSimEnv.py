@@ -48,22 +48,27 @@ def load_bs():
     return BalanceSheets
 
 
-def initialize_asset_market():
+def initialize_asset_market(Cifuentes_Impact_lamda=None):
     assets = {}
     assets['CASH'], assets['CB'], assets['GB'], assets['OTHER'] = \
         Asset('CASH', MARKET_TOTAL_VALUE['CASH']), Asset('CB', MARKET_TOTAL_VALUE['CB']), \
         Asset('GB', MARKET_TOTAL_VALUE['GB']), Asset('OTHER', MARKET_TOTAL_VALUE['OTHER'])
-    return AssetMarket(assets, CifuentesImpact)
+    if Cifuentes_Impact_lamda is not None:
+        return AssetMarket(assets, CifuentesImpact(l=Cifuentes_Impact_lamda))
+    else:
+        return AssetMarket(assets, CifuentesImpact())
+
 
 
 class BankSimEnv:#(MultiAgentEnv):
-    def __init__(self, shock):
+    def __init__(self, shock, Cifuentes_Impact_lambda=None):
         self.allAgentBanks = {}
         self.initialEquity = {}
         self.DefaultBanks = []  # list of names that has defaulted
         self.AssetMarket = initialize_asset_market()
         self.Day = 0
         self.shock = shock
+        self.Cifuentes_Impact_lambda = Cifuentes_Impact_lambda
 
     def reset(self):
         """Resets the env and returns observations from ready agents.
@@ -72,7 +77,7 @@ class BankSimEnv:#(MultiAgentEnv):
         """
         self.allAgentBanks = {}
         self.DefaultBanks = []  # list of names that has defaulted
-        self.AssetMarket = initialize_asset_market()
+        self.AssetMarket = initialize_asset_market(Cifuentes_Impact_lamda=self.Cifuentes_Impact_lambda)
         init_balance_sheets = load_bs()
         for bank_name, BS in init_balance_sheets.items():
             self.allAgentBanks[bank_name] = AgentBank(bank_name, self.AssetMarket, BS)
@@ -151,13 +156,15 @@ class BankSimEnv:#(MultiAgentEnv):
         return obs, rewards, dones, infos
 
 
-class CollaborativeBankSimEnv: #(MultiAgentEnv):
-    def __init__(self):
+class CollaborativeBankSimEnv(): #(MultiAgentEnv):
+    def __init__(self, shock, Cifuentes_Impact_lambda=None):
+        self.shock = shock
         self.allAgentBanks = {}
         self.initialEquity = {}
         self.DefaultBanks = []  # list of names that has defaulted
         self.AssetMarket = initialize_asset_market()
         self.Day = 0
+        self.Cifuentes_Impact_lambda = Cifuentes_Impact_lambda
 
     def reset(self):
         """Resets the env and returns observations from ready agents.
@@ -166,15 +173,14 @@ class CollaborativeBankSimEnv: #(MultiAgentEnv):
         """
         self.allAgentBanks = {}
         self.DefaultBanks = []  # list of names that has defaulted
-        self.AssetMarket = initialize_asset_market()
+        self.AssetMarket = initialize_asset_market(Cifuentes_Impact_lamda=self.Cifuentes_Impact_lambda)
         init_balance_sheets = load_bs()
         for bank_name, BS in init_balance_sheets.items():
             self.allAgentBanks[bank_name] = AgentBank(bank_name, self.AssetMarket, BS)
-        self.AssetMarket.apply_initial_shock('GB', shock)
+        self.AssetMarket.apply_initial_shock('GB', self.shock)
         for bank_name, bank in self.allAgentBanks.items():
-            self.initialEquity[bank_name] = bank.get_equity_value()
+            self.initialEquity[bank_name] = deepcopy(bank.get_equity_value())
         obs = {}
-        price_dict = self.AssetMarket.query_price()
         for bank_name, bank in self.allAgentBanks.items():
             obs[bank.BankName] = bank.return_obs()
         return obs
@@ -218,7 +224,7 @@ class CollaborativeBankSimEnv: #(MultiAgentEnv):
             if bank.alive is False:
                 central_reward -= 10
             else:
-                central_reward += 10 * (bank.get_equity_value() / self.initialEquity[bank_name] -1 + INITIAL_SHOCK)
+                central_reward += 10 * (bank.get_equity_value() / self.initialEquity[bank_name] -1 + self.shock)
             # return dones
             if bank.alive is False:
                 dones[bank_name] = True

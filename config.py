@@ -26,7 +26,16 @@ TWO_AGENT_SAFE = GameParams(
     INITIAL_SHOCK=0.1,
     MARKET_TOTAL_VALUE={'CASH': 1, 'CB': 1e6, 'GB': 1e6, 'OTHER': 1},
     MAX_PLAY=5,
-    EPISDOES=1000,
+    EPISDOES=500,
+)
+
+FIVE_AGENT_SAFE = GameParams(
+    BANK_BS_PATH='/simulator/initial_BS/' + 'five_agent_safe.csv',
+    CifuentesImpact_LAMBDA=0.1,
+    INITIAL_SHOCK=0.1,
+    MARKET_TOTAL_VALUE={'CASH': 1, 'CB': 2e5, 'GB': 2e5, 'OTHER': 1},
+    MAX_PLAY=5,
+    EPISDOES=500,
 )
 
 ONE_AGENT_FORCE_SALE = GameParams(
@@ -46,4 +55,4 @@ EBA_2018_SHOCK = GameParams(BANK_BS_PATH='/simulator/initial_BS/' + 'EBA_2018.cs
                       EPISDOES=1000,
                       )
 
-GAME_PARAMS = TWO_AGENT_SAFE
+GAME_PARAMS = FIVE_AGENT_SAFE

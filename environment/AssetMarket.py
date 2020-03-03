@@ -41,7 +41,7 @@ class AssetMarket:
                 except KeyError:
                     continue
             fraction_to_sell = qty / asset.Quantity
-            new_price = self.impact_function(current_prices[atype], fraction_to_sell)
+            new_price = self.impact_function.impact(current_prices[atype], fraction_to_sell)
             self.prices[atype] = new_price
         return self.query_price()
 
